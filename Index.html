@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WCAG Contrast Matrix — Multi-Brand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --grp-lbl-w: 44px;
+    --tok-w: 180px;
+    --left-w: 236px;
+    --cell-w: 160px;
+    --group-gap: 20px;
+    --header-h: 64px;
+    --col-header-h: 94px;
+
+    --bg: #F5F7F8;
+    --bg-alt: #FFFFFF;
+    --border: #DDE2E4;
+    --text: #1A1D1E;
+    --text-sub: #677175;
+    --shadow: rgba(0,0,0,0.06);
+    --sticky-bg: #F5F7F8;
+
+    --grade-aaa-bg: #D1F5E6; --grade-aaa-fg: #0A5F3A;
+    --grade-aa-bg:  #D4E8F8; --grade-aa-fg:  #0A3D7A;
+    --grade-aal-bg: #FEF2CC; --grade-aal-fg: #7A4F00;
+    --grade-fail-bg:#FCDCDC; --grade-fail-fg:#8B1A1A;
+  }
+
+  [data-dark="true"] {
+    --bg: #131516;
+    --bg-alt: #1C2022;
+    --border: #2A3236;
+    --text: #E6EBED;
+    --text-sub: #7A8A90;
+    --shadow: rgba(0,0,0,0.35);
+    --sticky-bg: #131516;
+    --grade-aaa-bg: #0B3D26; --grade-aaa-fg: #4DDBA0;
+    --grade-aa-bg:  #0A1E3D; --grade-aa-fg:  #6EB4F5;
+    --grade-aal-bg: #3A2D00; --grade-aal-fg: #F5C430;
+    --grade-fail-bg:#3A0C0C; --grade-fail-fg:#F07070;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: background 0.25s, color 0.25s;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed; top:0; left:0; right:0;
+    height: var(--header-h);
+    background: var(--bg-alt); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; padding: 0 16px;
+    z-index: 100; box-shadow: 0 1px 8px var(--shadow);
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .header-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-sub); white-space: nowrap; flex-shrink: 0;
+  }
+  .brand-switcher {
+    display: flex; gap: 3px; background: var(--bg);
+    border-radius: 8px; padding: 3px; border: 1px solid var(--border);
+    flex-shrink: 0; transition: background 0.25s, border-color 0.25s;
+  }
+  .brand-btn {
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600;
+    padding: 5px 11px; border-radius: 6px; border: none;
+    cursor: pointer; background: transparent; color: var(--text-sub);
+    transition: all 0.18s; white-space: nowrap;
+  }
+  .brand-btn.active { color: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.2); }
+  .vsep { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+  .filter-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-sub); white-space: nowrap; flex-shrink: 0;
+  }
+  .filter-group { display: flex; gap: 3px; flex-shrink: 0; }
+  .filter-btn {
+    font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600;
+    padding: 4px 9px; border-radius: 5px; border: 1px solid var(--border);
+    cursor: pointer; background: transparent; color: var(--text-sub);
+    transition: all 0.18s; white-space: nowrap;
+  }
+  .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .filter-btn[data-grade="AAA"].active    { background:var(--grade-aaa-bg); color:var(--grade-aaa-fg); border-color:var(--grade-aaa-fg); }
+  .filter-btn[data-grade="AA"].active     { background:var(--grade-aa-bg);  color:var(--grade-aa-fg);  border-color:var(--grade-aa-fg); }
+  .filter-btn[data-grade="GTE_AA"].active { background:var(--grade-aa-bg);  color:var(--grade-aa-fg);  border-color:var(--grade-aa-fg); }
+  .filter-btn[data-grade="AAL"].active    { background:var(--grade-aal-bg); color:var(--grade-aal-fg); border-color:var(--grade-aal-fg); }
+  .filter-btn[data-grade="FAIL"].active   { background:var(--grade-fail-bg);color:var(--grade-fail-fg);border-color:var(--grade-fail-fg); }
+  .stats-bar {
+    margin-left: auto; display: flex; gap: 10px;
+    font-family: 'DM Mono', monospace; font-size: 11px; flex-shrink: 0;
+  }
+  .stat-item { display:flex; align-items:center; gap:4px; }
+  .stat-dot  { width:8px; height:8px; border-radius:2px; }
+
+  /* ── LAYOUT ── */
+  #layout-wrap {
+    margin-top: var(--header-h); flex:1;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  #col-header-wrap {
+    height: var(--col-header-h); overflow:hidden; flex-shrink:0;
+    background: var(--sticky-bg); border-bottom: 2px solid var(--border);
+    position:relative; z-index:50; transition: background 0.25s;
+  }
+  #col-header-inner {
+    display:flex; align-items:flex-end; white-space:nowrap; height:100%;
+  }
+  .ch-left-spacer {
+    width: var(--left-w); flex-shrink:0; height:100%;
+    display:flex; align-items:flex-end; padding: 0 8px 10px 8px;
+    border-right: 2px solid var(--border);
+  }
+  .ch-left-spacer span {
+    font-size:10px; font-weight:600; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--text-sub);
+  }
+  .ch-group {
+    display:inline-flex; flex-direction:column; align-items:flex-start;
+    margin-right: var(--group-gap); flex-shrink:0;
+    height:100%; justify-content:flex-end;
+  }
+  .ch-group-label {
+    font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--text-sub); padding:0 4px 5px 4px;
+    border-bottom: 2px solid var(--border); width:100%; margin-bottom:5px;
+  }
+  .ch-cells { display:flex; }
+  .ch-cell  { width:var(--cell-w); flex-shrink:0; padding:0 5px 8px; }
+  .ch-token-name {
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:500;
+    color:var(--text); line-height:1.3; white-space:normal; word-break:break-word;
+  }
+  .ch-token-hex {
+    display:flex; align-items:center; gap:4px; margin-top:3px;
+    font-family:'DM Mono',monospace; font-size:10px; color:var(--text-sub);
+  }
+  .hex-swatch {
+    width:10px; height:10px; border-radius:2px;
+    border:1px solid rgba(128,128,128,0.25); flex-shrink:0;
+  }
+
+  /* ── SCROLL BODY ── */
+  #scroll-body { flex:1; overflow:auto; }
+  #scroll-body::-webkit-scrollbar { width:8px; height:8px; }
+  #scroll-body::-webkit-scrollbar-track { background:var(--bg); }
+  #scroll-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+  #scroll-body::-webkit-scrollbar-corner { background:var(--bg); }
+
+  /* ── TABLE ── */
+  table { border-collapse:separate; border-spacing:0; table-layout:fixed; }
+  tr.tr-spacer td { height:var(--group-gap); background:var(--bg); border:none!important; padding:0; }
+  .td-grp {
+    position:sticky; left:0;
+    width:var(--grp-lbl-w); min-width:var(--grp-lbl-w); max-width:var(--grp-lbl-w);
+    background:var(--sticky-bg); z-index:10;
+    border-right:1px solid var(--border); padding:0; vertical-align:middle;
+    transition: background 0.25s;
+  }
+  .td-grp-inner {
+    writing-mode:vertical-rl; transform:rotate(180deg);
+    font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-sub); display:flex; align-items:center; justify-content:center;
+    width:100%; padding:6px 0; white-space:nowrap;
+  }
+  .td-tok {
+    position:sticky; left:var(--grp-lbl-w);
+    width:var(--tok-w); min-width:var(--tok-w); max-width:var(--tok-w);
+    background:var(--sticky-bg); z-index:10;
+    border-right:2px solid var(--border); padding:6px 8px; vertical-align:middle;
+    transition: background 0.25s;
+  }
+  .tok-name {
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:500;
+    color:var(--text); line-height:1.4; word-break:break-word; white-space:normal;
+  }
+  .tok-hex {
+    display:flex; align-items:center; gap:4px; margin-top:3px;
+    font-family:'DM Mono',monospace; font-size:10px; color:var(--text-sub);
+  }
+  td.td-group-gap {
+    width:var(--group-gap); min-width:var(--group-gap);
+    background:var(--bg); border:none!important; padding:0;
+  }
+  tr.tr-data td { border-bottom:1px solid var(--border); }
+  td.cell-td {
+    width:var(--cell-w); min-width:var(--cell-w); max-width:var(--cell-w);
+    padding:4px; vertical-align:top; transition:opacity 0.2s;
+  }
+  td.cell-td.dimmed { opacity:0.06; pointer-events:none; }
+  .cell-card { border-radius:8px; overflow:hidden; box-shadow:0 1px 4px var(--shadow); width:100%; }
+  .cell-preview {
+    padding:8px 10px 7px; min-height:48px;
+    display:flex; flex-direction:column; gap:1px;
+  }
+  .preview-title { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; line-height:1.2; }
+  .preview-body  { font-family:'Syne',sans-serif; font-size:10px; font-weight:400; line-height:1.3; }
+  .cell-info {
+    background:var(--bg-alt); border-top:1px solid var(--border);
+    padding:5px 7px; display:flex; flex-direction:column; gap:3px;
+    transition: background 0.25s;
+  }
+  .cell-hex-row {
+    display:flex; align-items:center; gap:4px;
+    font-family:'DM Mono',monospace; font-size:9px; color:var(--text-sub);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .cell-bottom { display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:1px; }
+  .ratio-val { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:var(--text); }
+  .grade-badge {
+    font-family:'DM Mono',monospace; font-size:9px; font-weight:500;
+    padding:2px 5px; border-radius:3px; letter-spacing:0.04em; white-space:nowrap;
+  }
+  .grade-AAA  { background:var(--grade-aaa-bg); color:var(--grade-aaa-fg); }
+  .grade-AA   { background:var(--grade-aa-bg);  color:var(--grade-aa-fg); }
+  .grade-AAL  { background:var(--grade-aal-bg); color:var(--grade-aal-fg); }
+  .grade-FAIL { background:var(--grade-fail-bg);color:var(--grade-fail-fg); }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-title">Contrast Matrix</span>
+  <div class="brand-switcher" id="brandSwitcher">
+    <button class="brand-btn active" data-brand="MAAF">MAAF Light</button>
+    <button class="brand-btn" data-brand="MAAF_DARK">MAAF Dark</button>
+    <button class="brand-btn" data-brand="GMF">GMF</button>
+    <button class="brand-btn" data-brand="MMA">MMA</button>
+  </div>
+  <div class="vsep"></div>
+  <span class="filter-label">Filtre</span>
+  <div class="filter-group" id="filterGroup">
+    <button class="filter-btn active" data-grade="ALL">Tous</button>
+    <button class="filter-btn" data-grade="AAA">AAA</button>
+    <button class="filter-btn" data-grade="GTE_AA">≥ AA</button>
+    <button class="filter-btn" data-grade="AA">AA</button>
+    <button class="filter-btn" data-grade="AAL">AA Large</button>
+    <button class="filter-btn" data-grade="FAIL">FAIL</button>
+  </div>
+  <div class="stats-bar" id="statsBar"></div>
+</header>
+
+<div id="layout-wrap">
+  <div id="col-header-wrap"><div id="col-header-inner"></div></div>
+  <div id="scroll-body">
+    <table id="mainTable"><tbody id="tableBody"></tbody></table>
+  </div>
+</div>
+
+<script>
+// ─── DATA — exhaustive extraction + alias resolution ─────────────────────────
+// Surface tokens: Layout / Block / UI / Overlay (hors ___Base, Gradient)
+// Text tokens: all 9 (Neutral / Accent / Brand / Mise en avant++)
+// Aliases resolved at extraction time (python)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BRANDS = {
+
+  MAAF: {
+    label:'MAAF Light', accent:'#DA004E', dark:false,
+    text: [
+      {key:'Text & Icon / Neutral / Default',          hex:'#282D2F', parts:['Text & Icon','Neutral','Default']},
+      {key:'Text & Icon / Neutral / Subtle',           hex:'#5D696D', parts:['Text & Icon','Neutral','Subtle']},
+      {key:'Text & Icon / Neutral / OnDark',           hex:'#FFFFFF', parts:['Text & Icon','Neutral','OnDark']},
+      {key:'Text & Icon / Accent / Subtle',            hex:'#1C4967', parts:['Text & Icon','Accent','Subtle']},
+      {key:'Text & Icon / Accent / Default',           hex:'#1C4967', parts:['Text & Icon','Accent','Default']},
+      {key:'Text & Icon / Brand / Default',            hex:'#008296', parts:['Text & Icon','Brand','Default']},
+      {key:'Text & Icon / Mise en avant ++ / Weaker',  hex:'#FDF1F6', parts:['Text & Icon','Mise en avant ++','Weaker']},
+      {key:'Text & Icon / Mise en avant ++ / Weak',    hex:'#FBDAE7', parts:['Text & Icon','Mise en avant ++','Weak']},
+      {key:'Text & Icon / Mise en avant ++ / Strong',  hex:'#990038', parts:['Text & Icon','Mise en avant ++','Strong']},
+    ],
+    surface: [
+      // Layout
+      {key:'Surface / Layout / Neutral / Default',        hex:'#FFFFFF', parts:['Surface','Layout','Neutral','Default']},
+      {key:'Surface / Layout / Neutral / Alt',            hex:'#F3F5F6', parts:['Surface','Layout','Neutral','Alt']},
+      {key:'Surface / Layout / Neutral / Strong',         hex:'#E7EAEB', parts:['Surface','Layout','Neutral','Strong']},
+      {key:'Surface / Layout / Decorative / Very subtle', hex:'#F2F8F9', parts:['Surface','Layout','Decorative','Very subtle']},
+      {key:'Surface / Layout / Decorative / Subtle',      hex:'#E6F3F5', parts:['Surface','Layout','Decorative','Subtle']},
+      {key:'Surface / Layout / Footer / Default',         hex:'#FFFFFF', parts:['Surface','Layout','Footer','Default']},
+      // Overlay
+      {key:'Surface / Overlay / Default',                 hex:'#006F80', parts:['Surface','Overlay','Default']},
+      // Block
+      {key:'Surface / Block / Neutral / Weaker',          hex:'#FFFFFF', parts:['Surface','Block','Neutral','Weaker']},
+      {key:'Surface / Block / Neutral / Weak',            hex:'#F3F5F6', parts:['Surface','Block','Neutral','Weak']},
+      {key:'Surface / Block / Brand / Weaker',            hex:'#F2F8F9', parts:['Surface','Block','Brand','Weaker']},
+      {key:'Surface / Block / Brand / Weak',              hex:'#E6F3F5', parts:['Surface','Block','Brand','Weak']},
+      {key:'Surface / Block / Brand / Strong',            hex:'#008296', parts:['Surface','Block','Brand','Strong']},
+      {key:'Surface / Block / Mise en avant ++ / Weaker', hex:'#FDF1F6', parts:['Surface','Block','Mise en avant ++','Weaker']},
+      {key:'Surface / Block / Mise en avant ++ / Weak',   hex:'#FBDAE7', parts:['Surface','Block','Mise en avant ++','Weak']},
+      // UI
+      {key:'Surface / UI / Neutral / Weaker',             hex:'#FFFFFF', parts:['Surface','UI','Neutral','Weaker']},
+      {key:'Surface / UI / Neutral / Weak',               hex:'#F3F5F6', parts:['Surface','UI','Neutral','Weak']},
+      {key:'Surface / UI / Brand / Weaker',               hex:'#F2F8F9', parts:['Surface','UI','Brand','Weaker']},
+      {key:'Surface / UI / Brand / Weak',                 hex:'#E6F3F5', parts:['Surface','UI','Brand','Weak']},
+    ]
+  },
+
+  MAAF_DARK: {
+    label:'MAAF Dark', accent:'#00B5CE', dark:true,
+    text: [
+      {key:'Text & Icon / Neutral / Default',          hex:'#FFFFFF', parts:['Text & Icon','Neutral','Default']},
+      {key:'Text & Icon / Neutral / Subtle',           hex:'#A6ABAE', parts:['Text & Icon','Neutral','Subtle']},
+      {key:'Text & Icon / Neutral / OnDark',           hex:'#FFFFFF', parts:['Text & Icon','Neutral','OnDark']},
+      {key:'Text & Icon / Accent / Subtle',            hex:'#FFFFFF', parts:['Text & Icon','Accent','Subtle']},
+      {key:'Text & Icon / Accent / Default',           hex:'#FFFFFF', parts:['Text & Icon','Accent','Default']},
+      {key:'Text & Icon / Brand / Default',            hex:'#00B5CE', parts:['Text & Icon','Brand','Default']},
+      {key:'Text & Icon / Mise en avant ++ / Weaker',  hex:'#FDF1F6', parts:['Text & Icon','Mise en avant ++','Weaker']},
+      {key:'Text & Icon / Mise en avant ++ / Weak',    hex:'#FBDAE7', parts:['Text & Icon','Mise en avant ++','Weak']},
+      {key:'Text & Icon / Mise en avant ++ / Strong',  hex:'#FF5275', parts:['Text & Icon','Mise en avant ++','Strong']},
+    ],
+    surface: [
+      {key:'Surface / Layout / Neutral / Default',        hex:'#232626', parts:['Surface','Layout','Neutral','Default']},
+      {key:'Surface / Layout / Neutral / Alt',            hex:'#191A1A', parts:['Surface','Layout','Neutral','Alt']},
+      {key:'Surface / Layout / Neutral / Strong',         hex:'#0E0F10', parts:['Surface','Layout','Neutral','Strong']},
+      {key:'Surface / Layout / Decorative / Very subtle', hex:'#1B1E1F', parts:['Surface','Layout','Decorative','Very subtle']},
+      {key:'Surface / Layout / Decorative / Subtle',      hex:'#282D2F', parts:['Surface','Layout','Decorative','Subtle']},
+      {key:'Surface / Layout / Footer / Default',         hex:'#FFFFFF', parts:['Surface','Layout','Footer','Default']},
+      {key:'Surface / Overlay / Default',                 hex:'#005B69', parts:['Surface','Overlay','Default']},
+      {key:'Surface / Block / Neutral / Weaker',          hex:'#353C3E', parts:['Surface','Block','Neutral','Weaker']},
+      {key:'Surface / Block / Neutral / Weak',            hex:'#434B4D', parts:['Surface','Block','Neutral','Weak']},
+      {key:'Surface / Block / Brand / Weaker',            hex:'#50595D', parts:['Surface','Block','Brand','Weaker']},
+      {key:'Surface / Block / Brand / Weak',              hex:'#50595D', parts:['Surface','Block','Brand','Weak']},
+      {key:'Surface / Block / Brand / Strong',            hex:'#00B5CE', parts:['Surface','Block','Brand','Strong']},
+      {key:'Surface / Block / Mise en avant ++ / Weaker', hex:'#FDF1F6', parts:['Surface','Block','Mise en avant ++','Weaker']},
+      {key:'Surface / Block / Mise en avant ++ / Weak',   hex:'#FBDAE7', parts:['Surface','Block','Mise en avant ++','Weak']},
+      {key:'Surface / UI / Neutral / Weaker',             hex:'#353C3E', parts:['Surface','UI','Neutral','Weaker']},
+      {key:'Surface / UI / Neutral / Weak',               hex:'#434B4D', parts:['Surface','UI','Neutral','Weak']},
+      {key:'Surface / UI / Brand / Weaker',               hex:'#50595D', parts:['Surface','UI','Brand','Weaker']},
+      {key:'Surface / UI / Brand / Weak',                 hex:'#50595D', parts:['Surface','UI','Brand','Weak']},
+    ]
+  },
+
+  GMF: {
+    label:'GMF', accent:'#004696', dark:false,
+    text: [
+      {key:'Text & Icon / Neutral / Default',          hex:'#3E4552', parts:['Text & Icon','Neutral','Default']},
+      {key:'Text & Icon / Neutral / Subtle',           hex:'#535353', parts:['Text & Icon','Neutral','Subtle']},
+      {key:'Text & Icon / Neutral / OnDark',           hex:'#FFFFFF', parts:['Text & Icon','Neutral','OnDark']},
+      {key:'Text & Icon / Accent / Subtle',            hex:'#004696', parts:['Text & Icon','Accent','Subtle']},
+      {key:'Text & Icon / Accent / Default',           hex:'#004696', parts:['Text & Icon','Accent','Default']},
+      {key:'Text & Icon / Brand / Default',            hex:'#004696', parts:['Text & Icon','Brand','Default']},
+      {key:'Text & Icon / Mise en avant ++ / Weaker',  hex:'#E0EDFF', parts:['Text & Icon','Mise en avant ++','Weaker']},
+      {key:'Text & Icon / Mise en avant ++ / Weak',    hex:'#E0EDFF', parts:['Text & Icon','Mise en avant ++','Weak']},
+      {key:'Text & Icon / Mise en avant ++ / Strong',  hex:'#004696', parts:['Text & Icon','Mise en avant ++','Strong']},
+    ],
+    surface: [
+      {key:'Surface / Layout / Neutral / Default',        hex:'#FFFFFF', parts:['Surface','Layout','Neutral','Default']},
+      {key:'Surface / Layout / Neutral / Alt',            hex:'#F5F3EF', parts:['Surface','Layout','Neutral','Alt']},
+      {key:'Surface / Layout / Neutral / Strong',         hex:'#D1D1D1', parts:['Surface','Layout','Neutral','Strong']},
+      {key:'Surface / Layout / Decorative / Very subtle', hex:'#E0EDFF', parts:['Surface','Layout','Decorative','Very subtle']},
+      {key:'Surface / Layout / Decorative / Subtle',      hex:'#E0EDFF', parts:['Surface','Layout','Decorative','Subtle']},
+      {key:'Surface / Layout / Footer / Default',         hex:'#FFFFFF', parts:['Surface','Layout','Footer','Default']},
+      {key:'Surface / Overlay / Default',                 hex:'#004696', parts:['Surface','Overlay','Default']},
+      {key:'Surface / Block / Neutral / Weaker',          hex:'#FFFFFF', parts:['Surface','Block','Neutral','Weaker']},
+      {key:'Surface / Block / Neutral / Weak',            hex:'#EDEDED', parts:['Surface','Block','Neutral','Weak']},
+      {key:'Surface / Block / Brand / Weaker',            hex:'#E0EDFF', parts:['Surface','Block','Brand','Weaker']},
+      {key:'Surface / Block / Brand / Weak',              hex:'#E0EDFF', parts:['Surface','Block','Brand','Weak']},
+      {key:'Surface / Block / Brand / Strong',            hex:'#004696', parts:['Surface','Block','Brand','Strong']},
+      {key:'Surface / Block / Mise en avant ++ / Weaker', hex:'#E0EDFF', parts:['Surface','Block','Mise en avant ++','Weaker']},
+      {key:'Surface / Block / Mise en avant ++ / Weak',   hex:'#E0EDFF', parts:['Surface','Block','Mise en avant ++','Weak']},
+      {key:'Surface / Block / Mise en avant ++ / Strong', hex:'#004696', parts:['Surface','Block','Mise en avant ++','Strong']},
+      {key:'Surface / UI / Neutral / Weaker',             hex:'#FFFFFF', parts:['Surface','UI','Neutral','Weaker']},
+      {key:'Surface / UI / Neutral / Weak',               hex:'#EDEDED', parts:['Surface','UI','Neutral','Weak']},
+      {key:'Surface / UI / Brand / Weaker',               hex:'#E0EDFF', parts:['Surface','UI','Brand','Weaker']},
+      {key:'Surface / UI / Brand / Weak',                 hex:'#E0EDFF', parts:['Surface','UI','Brand','Weak']},
+    ]
+  },
+
+  MMA: {
+    label:'MMA', accent:'#003FA6', dark:false,
+    text: [
+      {key:'Text & Icon / Neutral / Default',          hex:'#000000', parts:['Text & Icon','Neutral','Default']},
+      {key:'Text & Icon / Neutral / Subtle',           hex:'#68758F', parts:['Text & Icon','Neutral','Subtle']},
+      {key:'Text & Icon / Neutral / OnDark',           hex:'#F7FAFF', parts:['Text & Icon','Neutral','OnDark']},
+      {key:'Text & Icon / Accent / Subtle',            hex:'#003FA6', parts:['Text & Icon','Accent','Subtle']},
+      {key:'Text & Icon / Accent / Default',           hex:'#003FA6', parts:['Text & Icon','Accent','Default']},
+      {key:'Text & Icon / Brand / Default',            hex:'#003FA6', parts:['Text & Icon','Brand','Default']},
+      {key:'Text & Icon / Mise en avant ++ / Weaker',  hex:'#F7FAFF', parts:['Text & Icon','Mise en avant ++','Weaker']},
+      {key:'Text & Icon / Mise en avant ++ / Weak',    hex:'#EBF7FF', parts:['Text & Icon','Mise en avant ++','Weak']},
+      {key:'Text & Icon / Mise en avant ++ / Strong',  hex:'#003FA6', parts:['Text & Icon','Mise en avant ++','Strong']},
+    ],
+    surface: [
+      {key:'Surface / Layout / Neutral / Default',        hex:'#FFFFFF', parts:['Surface','Layout','Neutral','Default']},
+      {key:'Surface / Layout / Neutral / Alt',            hex:'#F3F4F5', parts:['Surface','Layout','Neutral','Alt']},
+      {key:'Surface / Layout / Neutral / Strong',         hex:'#E5EBF7', parts:['Surface','Layout','Neutral','Strong']},
+      {key:'Surface / Layout / Decorative / Very subtle', hex:'#F7FAFF', parts:['Surface','Layout','Decorative','Very subtle']},
+      {key:'Surface / Layout / Decorative / Subtle',      hex:'#EBF7FF', parts:['Surface','Layout','Decorative','Subtle']},
+      {key:'Surface / Layout / Footer / Default',         hex:'#FFFFFF', parts:['Surface','Layout','Footer','Default']},
+      {key:'Surface / Overlay / Default',                 hex:'#003FA6', parts:['Surface','Overlay','Default']},
+      {key:'Surface / Block / Neutral / Weaker',          hex:'#FFFFFF', parts:['Surface','Block','Neutral','Weaker']},
+      {key:'Surface / Block / Neutral / Weak',            hex:'#F6F7F9', parts:['Surface','Block','Neutral','Weak']},
+      {key:'Surface / Block / Brand / Weaker',            hex:'#F7FAFF', parts:['Surface','Block','Brand','Weaker']},
+      {key:'Surface / Block / Brand / Weak',              hex:'#EBF7FF', parts:['Surface','Block','Brand','Weak']},
+      {key:'Surface / Block / Brand / Strong',            hex:'#003FA6', parts:['Surface','Block','Brand','Strong']},
+      {key:'Surface / Block / Mise en avant ++ / Weaker', hex:'#F7FAFF', parts:['Surface','Block','Mise en avant ++','Weaker']},
+      {key:'Surface / Block / Mise en avant ++ / Weak',   hex:'#EBF7FF', parts:['Surface','Block','Mise en avant ++','Weak']},
+      {key:'Surface / Block / Mise en avant ++ / Strong', hex:'#003FA6', parts:['Surface','Block','Mise en avant ++','Strong']},
+      {key:'Surface / UI / Neutral / Weaker',             hex:'#FFFFFF', parts:['Surface','UI','Neutral','Weaker']},
+      {key:'Surface / UI / Neutral / Weak',               hex:'#F6F7F9', parts:['Surface','UI','Neutral','Weak']},
+      {key:'Surface / UI / Brand / Weaker',               hex:'#F7FAFF', parts:['Surface','UI','Brand','Weaker']},
+      {key:'Surface / UI / Brand / Weak',                 hex:'#EBF7FF', parts:['Surface','UI','Brand','Weak']},
+    ]
+  }
+};
+
+// MAAF manque Block/Mise en avant++/Strong (alias non résolu → Promotional.Default = #990038)
+// On l'ajoute manuellement
+BRANDS.MAAF.surface.push(
+  {key:'Surface / Block / Mise en avant ++ / Strong', hex:'#990038', parts:['Surface','Block','Mise en avant ++','Strong']}
+);
+
+// ─── WCAG ─────────────────────────────────────────────────────────────────────
+function luminance(hex) {
+  const h = hex.replace('#','');
+  const [r,g,b] = [0,2,4].map(i => {
+    const c = parseInt(h.slice(i,i+2),16)/255;
+    return c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4);
+  });
+  return 0.2126*r + 0.7152*g + 0.0722*b;
+}
+function contrastRatio(a, b) {
+  const la = luminance(a), lb = luminance(b);
+  return (Math.max(la,lb)+0.05) / (Math.min(la,lb)+0.05);
+}
+function grade(r) {
+  return r>=7 ? 'AAA' : r>=4.5 ? 'AA' : r>=3 ? 'AAL' : 'FAIL';
+}
+function gradeLabel(g) { return g==='AAL' ? 'AA Large' : g; }
+
+// ─── GROUP ────────────────────────────────────────────────────────────────────
+function groupBy(arr, fn) {
+  const out = {};
+  arr.forEach(t => { const k=fn(t); if(!out[k]) out[k]=[]; out[k].push(t); });
+  return out;
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let curBrand = 'MAAF', curFilter = 'ALL';
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  const b = BRANDS[curBrand];
+  document.documentElement.setAttribute('data-dark', b.dark ? 'true' : 'false');
+  const tGroups = groupBy(b.text,    t => t.parts[1]);
+  const sGroups = groupBy(b.surface, t => t.parts[1] + (t.parts[2] ? ' / '+t.parts[2] : ''));
+  buildColHeader(tGroups);
+  buildTable(tGroups, sGroups);
+  updateStats();
+  setupSync();
+}
+
+function buildColHeader(tGroups) {
+  const inner = document.getElementById('col-header-inner');
+  inner.innerHTML = '';
+  const sp = document.createElement('div');
+  sp.className = 'ch-left-spacer';
+  sp.innerHTML = '<span>Surface ↓</span>';
+  inner.appendChild(sp);
+  Object.entries(tGroups).forEach(([grp, toks]) => {
+    const gDiv = document.createElement('div');
+    gDiv.className = 'ch-group';
+    gDiv.style.width = (toks.length * 160) + 'px';
+    const lbl = document.createElement('div');
+    lbl.className = 'ch-group-label'; lbl.textContent = grp;
+    gDiv.appendChild(lbl);
+    const cells = document.createElement('div'); cells.className = 'ch-cells';
+    toks.forEach(tok => {
+      const c = document.createElement('div'); c.className = 'ch-cell';
+      c.innerHTML = `<div class="ch-token-name">${tok.parts.slice(2).join(' / ')}</div>
+        <div class="ch-token-hex"><span class="hex-swatch" style="background:${tok.hex}"></span>${tok.hex}</div>`;
+      cells.appendChild(c);
+    });
+    gDiv.appendChild(cells); inner.appendChild(gDiv);
+  });
+}
+
+function buildTable(tGroups, sGroups) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  const tGrpNames = Object.keys(tGroups);
+  const sGrpNames = Object.keys(sGroups);
+
+  let totalCols = 2;
+  tGrpNames.forEach((g,i) => { totalCols += tGroups[g].length; if(i < tGrpNames.length-1) totalCols++; });
+
+  sGrpNames.forEach((sGrp, sgi) => {
+    const sToks = sGroups[sGrp];
+    if (sgi > 0) {
+      const sp = document.createElement('tr'); sp.className = 'tr-spacer';
+      const td = document.createElement('td'); td.setAttribute('colspan', totalCols);
+      sp.appendChild(td); tbody.appendChild(sp);
+    }
+    sToks.forEach((sTok, sti) => {
+      const tr = document.createElement('tr'); tr.className = 'tr-data';
+      if (sti === 0) {
+        const tg = document.createElement('td'); tg.className = 'td-grp';
+        tg.setAttribute('rowspan', sToks.length);
+        const inn = document.createElement('div'); inn.className = 'td-grp-inner';
+        inn.textContent = sGrp; tg.appendChild(inn); tr.appendChild(tg);
+      }
+      const tt = document.createElement('td'); tt.className = 'td-tok';
+      tt.innerHTML = `<div class="tok-name">${sTok.parts.slice(2).join(' / ')}</div>
+        <div class="tok-hex"><span class="hex-swatch" style="background:${sTok.hex}"></span>${sTok.hex}</div>`;
+      tr.appendChild(tt);
+      tGrpNames.forEach((tGrp, tgi) => {
+        tGroups[tGrp].forEach(tTok => {
+          const ratio = contrastRatio(tTok.hex, sTok.hex);
+          const g = grade(ratio);
+          const td = document.createElement('td'); td.className = 'cell-td'; td.setAttribute('data-grade', g);
+          td.innerHTML = `<div class="cell-card">
+            <div class="cell-preview" style="background:${sTok.hex}">
+              <div class="preview-title" style="color:${tTok.hex}">Titre exemple</div>
+              <div class="preview-body"  style="color:${tTok.hex}">Corps de texte</div>
+            </div>
+            <div class="cell-info">
+              <div class="cell-hex-row"><span class="hex-swatch" style="background:${tTok.hex}"></span>T&nbsp;${tTok.hex}</div>
+              <div class="cell-hex-row"><span class="hex-swatch" style="background:${sTok.hex}"></span>S&nbsp;${sTok.hex}</div>
+              <div class="cell-bottom">
+                <span class="ratio-val">${ratio.toFixed(2)}:1</span>
+                <span class="grade-badge grade-${g}">${gradeLabel(g)}</span>
+              </div>
+            </div>
+          </div>`;
+          tr.appendChild(td);
+        });
+        if (tgi < tGrpNames.length-1) {
+          const gap = document.createElement('td'); gap.className = 'td-group-gap'; tr.appendChild(gap);
+        }
+      });
+      tbody.appendChild(tr);
+    });
+  });
+  applyFilter();
+}
+
+function applyFilter() {
+  const f = curFilter;
+  document.querySelectorAll('td.cell-td').forEach(td => {
+    const g = td.getAttribute('data-grade');
+    const show = f==='ALL' ? true : f==='AAA' ? g==='AAA' : f==='AA' ? g==='AA'
+      : f==='GTE_AA' ? (g==='AA'||g==='AAA') : f==='AAL' ? g==='AAL' : f==='FAIL' ? g==='FAIL' : true;
+    td.classList.toggle('dimmed', !show);
+  });
+}
+
+function updateStats() {
+  const counts = {AAA:0, AA:0, AAL:0, FAIL:0};
+  document.querySelectorAll('td.cell-td').forEach(td => {
+    const g = td.getAttribute('data-grade'); if(g in counts) counts[g]++;
+  });
+  document.getElementById('statsBar').innerHTML = Object.entries(counts).map(([g,n]) => {
+    const cls = g==='AAL' ? 'aal' : g.toLowerCase();
+    return `<div class="stat-item">
+      <span class="stat-dot" style="background:var(--grade-${cls}-bg);border:1px solid var(--grade-${cls}-fg)"></span>
+      <span style="color:var(--text-sub)">${gradeLabel(g)}</span>
+      <strong style="font-family:'DM Mono',monospace;color:var(--text)">${n}</strong>
+    </div>`;
+  }).join('');
+}
+
+function setupSync() {
+  const body  = document.getElementById('scroll-body');
+  const inner = document.getElementById('col-header-inner');
+  if (body._sf) body.removeEventListener('scroll', body._sf);
+  body._sf = () => { inner.style.marginLeft = (-body.scrollLeft) + 'px'; };
+  body.addEventListener('scroll', body._sf, {passive:true});
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+document.getElementById('brandSwitcher').addEventListener('click', e => {
+  const btn = e.target.closest('.brand-btn'); if (!btn) return;
+  curBrand = btn.dataset.brand;
+  document.querySelectorAll('.brand-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
+  btn.classList.add('active'); btn.style.background = BRANDS[curBrand].accent;
+  render();
+});
+
+document.querySelectorAll('.brand-btn').forEach(btn => {
+  btn.addEventListener('mouseenter', () => { if(!btn.classList.contains('active')) btn.style.color = BRANDS[btn.dataset.brand].accent; });
+  btn.addEventListener('mouseleave', () => { if(!btn.classList.contains('active')) { btn.style.color=''; btn.style.background=''; } });
+});
+
+document.getElementById('filterGroup').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn'); if (!btn) return;
+  curFilter = btn.dataset.grade;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); applyFilter();
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.querySelector('.brand-btn[data-brand="MAAF"]').style.background = BRANDS.MAAF.accent;
+render();
+</script>
+</body>
+</html>
