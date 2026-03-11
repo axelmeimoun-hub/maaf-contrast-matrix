@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAAF – Tableau Croisé Contraste</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F4F5F7;
+  --white: #FFFFFF;
+  --border: #DDE1E7;
+  --border-light: #ECEEF2;
+  --text-primary: #111318;
+  --text-secondary: #5C6370;
+  --text-muted: #9AA0AD;
+  --accent: #DA004E;
+
+  --aaa-bg: #E8F7EE; --aaa-fg: #1A6B3C; --aaa-dot: #2ECC71;
+  --aa-bg:  #E8F3FD; --aa-fg:  #1A4A7A; --aa-dot:  #3498DB;
+  --aal-bg: #FEF9E7; --aal-fg: #7A5C00; --aal-dot: #F1C40F;
+  --fail-bg:#FDECEA; --fail-fg:#B71C1C; --fail-dot:#E74C3C;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+}
+
+header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.header-title h1 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+.header-title h1 em { font-style: normal; color: var(--accent); }
+.header-title p {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.filter-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.filter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 4px;
+}
+.grade-btn {
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1.5px solid transparent;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  opacity: 0.45;
+}
+.grade-btn:hover { opacity: 0.75; }
+.grade-btn.active { opacity: 1; border-color: currentColor; }
+.grade-btn.all  { background: #EEEFF2; color: var(--text-secondary); }
+.grade-btn.aaa  { background: var(--aaa-bg); color: var(--aaa-fg); }
+.grade-btn.aa   { background: var(--aa-bg);  color: var(--aa-fg);  }
+.grade-btn.aal  { background: var(--aal-bg); color: var(--aal-fg); }
+.grade-btn.fail { background: var(--fail-bg);color: var(--fail-fg);}
+
+.scroll-outer { padding: 32px 40px 60px; overflow-x: auto; }
+
+.cross-table { border-collapse: separate; border-spacing: 0; min-width: max-content; }
+
+.corner-cell {
+  background: var(--bg);
+  position: sticky;
+  left: 0;
+  z-index: 50;
+  min-width: 210px;
+  width: 210px;
+  vertical-align: bottom;
+  padding-bottom: 12px;
+}
+.corner-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.corner-axis { display: flex; align-items: center; gap: 6px; }
+.corner-axis::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 1px;
+  background: var(--text-muted);
+}
+
+.col-header { padding: 0 6px 12px; vertical-align: bottom; min-width: 180px; width: 180px; }
+.col-header-inner {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.token-category {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  line-height: 1.3;
+}
+.token-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.hex-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.swatch {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+.row-header {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background: var(--bg);
+  padding: 6px 12px 6px 0;
+  min-width: 210px;
+  width: 210px;
+  vertical-align: middle;
+}
+.row-header-inner {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cell-td { padding: 6px; vertical-align: top; }
+.cell-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 168px;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.cell-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+
+.preview-area {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+.preview-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.preview-body {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.card-meta {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-bottom: 1px solid var(--border-light);
+}
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.meta-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  width: 14px;
+  flex-shrink: 0;
+}
+
+.card-footer {
+  padding: 6px 12px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ratio-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.grade-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-family: 'Syne', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.grade-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.grade-AAA      { background: var(--aaa-bg);  color: var(--aaa-fg);  }
+.grade-AAA::before  { background: var(--aaa-dot); }
+.grade-AA       { background: var(--aa-bg);   color: var(--aa-fg);   }
+.grade-AA::before   { background: var(--aa-dot); }
+.grade-AA-Large { background: var(--aal-bg);  color: var(--aal-fg);  }
+.grade-AA-Large::before { background: var(--aal-dot); }
+.grade-FAIL     { background: var(--fail-bg); color: var(--fail-fg); }
+.grade-FAIL::before { background: var(--fail-dot); }
+
+.cell-card.dimmed { opacity: 0.07; pointer-events: none; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>MAAF — Tableau Croisé <em>Contraste</em></h1>
+    <p>Tokens Texte (colonnes) × Tokens Surface (lignes) · WCAG 2.2</p>
+  </div>
+  <div class="filter-bar">
+    <span class="filter-label">Filtrer</span>
+    <button class="grade-btn all active" data-grade="">Tous</button>
+    <button class="grade-btn aaa"        data-grade="AAA">AAA</button>
+    <button class="grade-btn aa"         data-grade="AA">AA</button>
+    <button class="grade-btn aal"        data-grade="AA Large">AA Large</button>
+    <button class="grade-btn fail"       data-grade="FAIL">FAIL</button>
+  </div>
+</header>
+
+<div class="scroll-outer">
+  <table class="cross-table" id="crossTable"></table>
+</div>
+
+<script>
+const DATA = {"text_tokens": [{"path": "Text & Icon/Neutral/Default", "hex": "#282D2F"}, {"path": "Text & Icon/Neutral/Subtle", "hex": "#5D696D"}, {"path": "Text & Icon/Neutral/OnDark", "hex": "#FFFFFF"}, {"path": "Text & Icon/Accent/Subtle", "hex": "#1C4967"}, {"path": "Text & Icon/Accent/Default", "hex": "#1C4967"}, {"path": "Text & Icon/Brand/Default", "hex": "#008296"}, {"path": "Text & Icon/Mise en avant ++/Weaker", "hex": "#FDF1F6"}, {"path": "Text & Icon/Mise en avant ++/Weak", "hex": "#FBDAE7"}, {"path": "Text & Icon/Mise en avant ++/Strong", "hex": "#990038"}], "surface_tokens": [{"path": "Surface/Layout/Neutral/Default", "hex": "#FFFFFF"}, {"path": "Surface/Layout/Neutral/Alt", "hex": "#F3F5F6"}, {"path": "Surface/Layout/Neutral/Strong", "hex": "#E7EAEB"}, {"path": "Surface/Layout/Decorative/Very subtle", "hex": "#F2F8F9"}, {"path": "Surface/Layout/Decorative/Subtle", "hex": "#E6F3F5"}, {"path": "Surface/Layout/Footer (\u00e0 faire)/Default", "hex": "#FFFFFF"}, {"path": "Surface/Overlay (toaster, tooltip,etc)/Default", "hex": "#006F80"}, {"path": "Surface/Block/Neutral/Weaker", "hex": "#FFFFFF"}, {"path": "Surface/Block/Neutral/Weak", "hex": "#F3F5F6"}, {"path": "Surface/Block/Brand/Weaker", "hex": "#F2F8F9"}, {"path": "Surface/Block/Brand/Weak", "hex": "#E6F3F5"}, {"path": "Surface/Block/Brand/Strong", "hex": "#008296"}, {"path": "Surface/Block/Mise en avant ++/Weaker", "hex": "#FDF1F6"}, {"path": "Surface/Block/Mise en avant ++/Weak", "hex": "#FBDAE7"}, {"path": "Surface/Block/Mise en avant ++/Strong", "hex": "#990038"}, {"path": "Surface/UI/Neutral/Weaker", "hex": "#FFFFFF"}, {"path": "Surface/UI/Neutral/Weak", "hex": "#F3F5F6"}, {"path": "Surface/UI/Brand/Weaker", "hex": "#F2F8F9"}, {"path": "Surface/UI/Brand/Weak", "hex": "#E6F3F5"}], "matrix": [[{"ratio": 13.94, "grade": "AAA"}, {"ratio": 5.67, "grade": "AA"}, {"ratio": 1.0, "grade": "FAIL"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 4.53, "grade": "AA"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 1.29, "grade": "FAIL"}, {"ratio": 8.71, "grade": "AAA"}], [{"ratio": 12.75, "grade": "AAA"}, {"ratio": 5.18, "grade": "AA"}, {"ratio": 1.09, "grade": "FAIL"}, {"ratio": 8.74, "grade": "AAA"}, {"ratio": 8.74, "grade": "AAA"}, {"ratio": 4.14, "grade": "AA Large"}, {"ratio": 1.01, "grade": "FAIL"}, {"ratio": 1.18, "grade": "FAIL"}, {"ratio": 7.96, "grade": "AAA"}], [{"ratio": 11.53, "grade": "AAA"}, {"ratio": 4.68, "grade": "AA"}, {"ratio": 1.21, "grade": "FAIL"}, {"ratio": 7.9, "grade": "AAA"}, {"ratio": 7.9, "grade": "AAA"}, {"ratio": 3.75, "grade": "AA Large"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 1.07, "grade": "FAIL"}, {"ratio": 7.2, "grade": "AAA"}], [{"ratio": 12.99, "grade": "AAA"}, {"ratio": 5.28, "grade": "AA"}, {"ratio": 1.07, "grade": "FAIL"}, {"ratio": 8.9, "grade": "AAA"}, {"ratio": 8.9, "grade": "AAA"}, {"ratio": 4.22, "grade": "AA Large"}, {"ratio": 1.03, "grade": "FAIL"}, {"ratio": 1.2, "grade": "FAIL"}, {"ratio": 8.12, "grade": "AAA"}], [{"ratio": 12.28, "grade": "AAA"}, {"ratio": 4.99, "grade": "AA"}, {"ratio": 1.13, "grade": "FAIL"}, {"ratio": 8.42, "grade": "AAA"}, {"ratio": 8.42, "grade": "AAA"}, {"ratio": 3.99, "grade": "AA Large"}, {"ratio": 1.03, "grade": "FAIL"}, {"ratio": 1.14, "grade": "FAIL"}, {"ratio": 7.67, "grade": "AAA"}], [{"ratio": 13.94, "grade": "AAA"}, {"ratio": 5.67, "grade": "AA"}, {"ratio": 1.0, "grade": "FAIL"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 4.53, "grade": "AA"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 1.29, "grade": "FAIL"}, {"ratio": 8.71, "grade": "AAA"}], [{"ratio": 2.38, "grade": "FAIL"}, {"ratio": 1.03, "grade": "FAIL"}, {"ratio": 5.86, "grade": "AA"}, {"ratio": 1.63, "grade": "FAIL"}, {"ratio": 1.63, "grade": "FAIL"}, {"ratio": 1.29, "grade": "FAIL"}, {"ratio": 5.32, "grade": "AA"}, {"ratio": 4.54, "grade": "AA"}, {"ratio": 1.49, "grade": "FAIL"}], [{"ratio": 13.94, "grade": "AAA"}, {"ratio": 5.67, "grade": "AA"}, {"ratio": 1.0, "grade": "FAIL"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 4.53, "grade": "AA"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 1.29, "grade": "FAIL"}, {"ratio": 8.71, "grade": "AAA"}], [{"ratio": 12.75, "grade": "AAA"}, {"ratio": 5.18, "grade": "AA"}, {"ratio": 1.09, "grade": "FAIL"}, {"ratio": 8.74, "grade": "AAA"}, {"ratio": 8.74, "grade": "AAA"}, {"ratio": 4.14, "grade": "AA Large"}, {"ratio": 1.01, "grade": "FAIL"}, {"ratio": 1.18, "grade": "FAIL"}, {"ratio": 7.96, "grade": "AAA"}], [{"ratio": 12.99, "grade": "AAA"}, {"ratio": 5.28, "grade": "AA"}, {"ratio": 1.07, "grade": "FAIL"}, {"ratio": 8.9, "grade": "AAA"}, {"ratio": 8.9, "grade": "AAA"}, {"ratio": 4.22, "grade": "AA Large"}, {"ratio": 1.03, "grade": "FAIL"}, {"ratio": 1.2, "grade": "FAIL"}, {"ratio": 8.12, "grade": "AAA"}], [{"ratio": 12.28, "grade": "AAA"}, {"ratio": 4.99, "grade": "AA"}, {"ratio": 1.13, "grade": "FAIL"}, {"ratio": 8.42, "grade": "AAA"}, {"ratio": 8.42, "grade": "AAA"}, {"ratio": 3.99, "grade": "AA Large"}, {"ratio": 1.03, "grade": "FAIL"}, {"ratio": 1.14, "grade": "FAIL"}, {"ratio": 7.67, "grade": "AAA"}], [{"ratio": 3.08, "grade": "AA Large"}, {"ratio": 1.25, "grade": "FAIL"}, {"ratio": 4.53, "grade": "AA"}, {"ratio": 2.11, "grade": "FAIL"}, {"ratio": 2.11, "grade": "FAIL"}, {"ratio": 1.0, "grade": "FAIL"}, {"ratio": 4.12, "grade": "AA Large"}, {"ratio": 3.51, "grade": "AA Large"}, {"ratio": 1.92, "grade": "FAIL"}], [{"ratio": 12.67, "grade": "AAA"}, {"ratio": 5.15, "grade": "AA"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 8.68, "grade": "AAA"}, {"ratio": 8.68, "grade": "AAA"}, {"ratio": 4.12, "grade": "AA Large"}, {"ratio": 1.0, "grade": "FAIL"}, {"ratio": 1.17, "grade": "FAIL"}, {"ratio": 7.92, "grade": "AAA"}], [{"ratio": 10.81, "grade": "AAA"}, {"ratio": 4.39, "grade": "AA Large"}, {"ratio": 1.29, "grade": "FAIL"}, {"ratio": 7.41, "grade": "AAA"}, {"ratio": 7.41, "grade": "AAA"}, {"ratio": 3.51, "grade": "AA Large"}, {"ratio": 1.17, "grade": "FAIL"}, {"ratio": 1.0, "grade": "FAIL"}, {"ratio": 6.75, "grade": "AA"}], [{"ratio": 1.6, "grade": "FAIL"}, {"ratio": 1.54, "grade": "FAIL"}, {"ratio": 8.71, "grade": "AAA"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 1.92, "grade": "FAIL"}, {"ratio": 7.92, "grade": "AAA"}, {"ratio": 6.75, "grade": "AA"}, {"ratio": 1.0, "grade": "FAIL"}], [{"ratio": 13.94, "grade": "AAA"}, {"ratio": 5.67, "grade": "AA"}, {"ratio": 1.0, "grade": "FAIL"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 9.55, "grade": "AAA"}, {"ratio": 4.53, "grade": "AA"}, {"ratio": 1.1, "grade": "FAIL"}, {"ratio": 1.29, "grade": "FAIL"}, {"ratio": 8.71, "grade": "AAA"}], [{"ratio": 12.75, "grade": "AAA"}, {"ratio": 5.18, "grade": "AA"}, {"ratio": 1.09, "grade": "FAIL"}, {"ratio": 8.74, "grade": "AAA"}, {"ratio": 8.74, "grade": "AAA"}, {"ratio": 4.14, "grade": "AA Large"}, {"ratio": 1.01, "grade": "FAIL"}, {"ratio": 1.18, "grade": "FAIL"}, {"ratio": 7.96, "grade": "AAA"}], [{"ratio": 12.99, "grade": "AAA"}, {"ratio": 5.28, "grade": "AA"}, {"ratio": 1.07, "grade": "FAIL"}, {"ratio": 8.9, "grade": "AAA"}, {"ratio": 8.9, "grade": "AAA"}, {"ratio": 4.22, "grade": "AA Large"}, {"ratio": 1.03, "grade": "FAIL"}, {"ratio": 1.2, "grade": "FAIL"}, {"ratio": 8.12, "grade": "AAA"}], [{"ratio": 12.28, "grade": "AAA"}, {"ratio": 4.99, "grade": "AA"}, {"ratio": 1.13, "grade": "FAIL"}, {"ratio": 8.42, "grade": "AAA"}, {"ratio": 8.42, "grade": "AAA"}, {"ratio": 3.99, "grade": "AA Large"}, {"ratio": 1.03, "grade": "FAIL"}, {"ratio": 1.14, "grade": "FAIL"}, {"ratio": 7.67, "grade": "AAA"}]]};
+let activeGrade = '';
+
+function shortPath(path) {
+  const parts = path.split('/');
+  return { category: parts.slice(0, -1).join(' / '), name: parts[parts.length - 1] };
+}
+function gradeClass(g) { return 'grade-' + g.replace(' ', '-'); }
+
+function buildTable() {
+  const { text_tokens, surface_tokens, matrix } = DATA;
+  let html = '<thead><tr>';
+
+  html += `<th class="corner-cell">
+    <div class="corner-label">
+      <div class="corner-axis">Texte →</div>
+      <div class="corner-axis">Surface ↓</div>
+    </div>
+  </th>`;
+
+  text_tokens.forEach(tt => {
+    const p = shortPath(tt.path);
+    html += `<th class="col-header">
+      <div class="col-header-inner">
+        <div class="token-category">${p.category}</div>
+        <div class="token-name">${p.name}</div>
+        <div class="hex-row"><span class="swatch" style="background:${tt.hex}"></span>${tt.hex}</div>
+      </div>
+    </th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  surface_tokens.forEach((surf, si) => {
+    const sp = shortPath(surf.path);
+    html += '<tr>';
+    html += `<td class="row-header">
+      <div class="row-header-inner">
+        <div class="token-category">${sp.category}</div>
+        <div class="token-name">${sp.name}</div>
+        <div class="hex-row"><span class="swatch" style="background:${surf.hex}"></span>${surf.hex}</div>
+      </div>
+    </td>`;
+
+    text_tokens.forEach((tt, ti) => {
+      const cell = matrix[si][ti];
+      const gc = gradeClass(cell.grade);
+      const dimmed = activeGrade && cell.grade !== activeGrade ? 'dimmed' : '';
+      html += `<td class="cell-td">
+        <div class="cell-card ${dimmed}">
+          <div class="preview-area" style="background:${surf.hex}">
+            <div class="preview-title" style="color:${tt.hex}">Titre exemple</div>
+            <div class="preview-body" style="color:${tt.hex}">Corps de texte standard</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row"><span class="meta-label">T</span><span class="swatch" style="background:${tt.hex}"></span>${tt.hex}</div>
+            <div class="meta-row"><span class="meta-label">S</span><span class="swatch" style="background:${surf.hex}"></span>${surf.hex}</div>
+          </div>
+          <div class="card-footer">
+            <span class="ratio-text">${cell.ratio}:1</span>
+            <span class="grade-badge ${gc}">${cell.grade}</span>
+          </div>
+        </div>
+      </td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody>';
+  document.getElementById('crossTable').innerHTML = html;
+}
+
+document.querySelectorAll('.grade-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeGrade = btn.dataset.grade;
+    document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    buildTable();
+  });
+});
+
+buildTable();
+</script>
+</body>
+</html>
