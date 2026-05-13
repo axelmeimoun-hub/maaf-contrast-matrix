@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV — Mélanie Rupert</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;1,400&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #5271FF;
+      --dark:    #384347;
+      --black:   #000000;
+      --sq:      #65696D;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: #e8e8e8;
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .cv {
+      background: #fff;
+      width: 794px;
+      padding: 28px 36px 36px 36px;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────────── */
+    .header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .name {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      font-size: 28px;
+      color: var(--blue);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .contact {
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .contact .sep {
+      font-weight: 400;
+    }
+
+    .hdivider {
+      height: 1.5px;
+      background: var(--black);
+      margin-bottom: 10px;
+    }
+
+    /* ── BODY TWO-COL ────────────────────────────────────────── */
+    .body {
+      display: flex;
+      gap: 28px;
+    }
+
+    .col-left  { width: 57%; }
+    .col-right { width: 43%; }
+
+    /* ── SECTION ─────────────────────────────────────────────── */
+    .section { margin-bottom: 13px; }
+
+    .sec-title {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--black);
+      margin-bottom: 3px;
+      letter-spacing: 0.3px;
+    }
+
+    .sec-line {
+      height: 1.5px;
+      background: var(--black);
+      margin-bottom: 7px;
+    }
+
+    /* ── PRÉSENTATION ────────────────────────────────────────── */
+    .pres-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 400;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* ── JOB TITLE ───────────────────────────────────────────── */
+    .job-title {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--black);
+      margin-top: 6px;
+      margin-bottom: 5px;
+    }
+
+    /* ── BULLET LIST ─────────────────────────────────────────── */
+    .blist {
+      list-style: none;
+      margin-bottom: 7px;
+    }
+
+    .blist li {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      line-height: 1.55;
+      margin-bottom: 3.5px;
+      padding-left: 12px;
+      position: relative;
+      color: var(--black);
+    }
+
+    .blist li::before {
+      content: '-';
+      position: absolute;
+      left: 2px;
+    }
+
+    .bi { font-weight: 700; color: var(--black); }
+    .bd { font-style: italic; font-weight: 400; color: var(--black); }
+
+    /* ── COMPANY BLOCK ───────────────────────────────────────── */
+    .co-block { margin-bottom: 7px; }
+
+    .co-name {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--blue);
+    }
+
+    .co-date {
+      font-family: 'Rubik', sans-serif;
+      font-size: 8.5px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .sq {
+      display: inline-block;
+      width: 5.5px;
+      height: 5.5px;
+      background: var(--sq);
+      flex-shrink: 0;
+    }
+
+    .co-artists {
+      font-family: 'Rubik', sans-serif;
+      font-size: 9px;
+      color: var(--dark);
+      margin-top: 2px;
+      line-height: 1.45;
+    }
+
+    /* ── RIGHT: COMPÉTENCES ──────────────────────────────────── */
+    .skill-cat {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--black);
+      margin-bottom: 2px;
+    }
+
+    .skill-txt {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 400;
+      color: var(--dark);
+      line-height: 1.5;
+      margin-bottom: 7px;
+    }
+
+    /* ── RIGHT: ÉDUCATION ────────────────────────────────────── */
+    .edu-block { margin-bottom: 8px; }
+
+    .edu-deg {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 400;
+      font-size: 11px;
+      color: var(--black);
+      line-height: 1.35;
+    }
+
+    .edu-prog {
+      font-family: 'Rubik', sans-serif;
+      font-size: 9px;
+      color: var(--dark);
+    }
+
+    .edu-school {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--blue);
+    }
+
+    .edu-date {
+      font-family: 'Rubik', sans-serif;
+      font-size: 8.5px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    /* ── RIGHT: LANGUES ──────────────────────────────────────── */
+    .lang-row {
+      display: flex;
+      gap: 40px;
+    }
+
+    .lang-name {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--blue);
+    }
+
+    .lang-level {
+      font-family: 'Rubik', sans-serif;
+      font-size: 9px;
+      color: var(--dark);
+    }
+
+    /* ── RIGHT: INTÉRÊTS ─────────────────────────────────────── */
+    .int-title {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--black);
+      margin-bottom: 1px;
+    }
+
+    .int-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      color: var(--dark);
+      line-height: 1.5;
+    }
+
+    .int-gap { margin-top: 6px; }
+
+    /* ── ENGAGEMENTS (full-width) ────────────────────────────── */
+    .engagements { margin-top: 10px; }
+
+    .eng-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 24px;
+      row-gap: 10px;
+    }
+
+    .eng-block {}
+
+    .eng-name {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--blue);
+    }
+
+    .eng-sub {
+      font-family: 'Rubik', sans-serif;
+      font-size: 8.5px;
+      color: var(--blue);
+      display: inline;
+    }
+
+    .eng-act {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 8.5px;
+      color: var(--black);
+      margin-top: 2px;
+    }
+
+    .eng-date {
+      font-family: 'Rubik', sans-serif;
+      font-size: 8px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .eng-url {
+      font-family: 'Rubik', sans-serif;
+      font-size: 7.5px;
+      color: var(--dark);
+      margin-top: 1px;
+    }
+  </style>
+</head>
+<body>
+<div class="cv">
+
+  <!-- ═══ HEADER ════════════════════════════════════════════════ -->
+  <header class="header">
+    <div class="name">MÉLANIE RUPERT</div>
+    <div class="contact">
+      <span>+33 6 70 37 18 20</span>
+      <span>rupert.melanie@gmail.com</span>
+      <span>www.linkedin.com/in/melanie-rupert</span>
+      <span>Marseille <span class="sep">/</span> Paris</span>
+    </div>
+  </header>
+  <div class="hdivider"></div>
+
+  <!-- ═══ BODY ══════════════════════════════════════════════════ -->
+  <div class="body">
+
+    <!-- ─── LEFT COLUMN ─────────────────────────────────────── -->
+    <div class="col-left">
+
+      <!-- PRÉSENTATION -->
+      <div class="section">
+        <div class="sec-title">PRÉSENTATION</div>
+        <div class="sec-line"></div>
+        <p class="pres-text">
+          Forte de près de 10 ans d'expérience dans l'industrie musicale dont 8 ans en tant que
+          Cheffe de Projet Marketing en labels (major &amp; indépendant), je mets mon expertise en
+          gestion de projet et stratégie Marketing au service de projets ambitieux.
+        </p>
+      </div>
+
+      <!-- EXPÉRIENCES PROFESSIONNELLES -->
+      <div class="section">
+        <div class="sec-title">EXPÉRIENCES PROFESSIONNELLES</div>
+        <div class="sec-line"></div>
+
+        <!-- Job 1 -->
+        <div class="job-title">Cheffe de Projet Marketing</div>
+
+        <ul class="blist">
+          <li>
+            <span class="bi">Définition et déploiement de la stratégie Marketing globale des projets artistiques</span>
+            <span class="bd"> - positionnement, image, timeline, audience, moodboard, offline &amp; online, trade mkt</span>
+          </li>
+          <li>
+            <span class="bi">Direction artistique &amp; supervision de la production de contenus</span>
+            <span class="bd"> - photos, clips, graphisme, assets socials, contenus publicitaires, objets promotionnels, print, ..</span>
+          </li>
+          <li>
+            <span class="bi">Participation active à la stratégie digitale</span>
+            <span class="bd"> - ciblage des campagnes ads &amp; socials, analyse des données &amp; optimisation de la performance et de la stratégie artiste</span>
+          </li>
+          <li>
+            <span class="bi">Interlocutrice directe de lʼartiste, de son management, et ses ayants droits</span>
+          </li>
+          <li>
+            <span class="bi">Coordination transverse des équipes internes &amp; externes</span>
+            <span class="bd"> - A&amp;R, promotion, synchro, commercial, fabrication, publishing, branding, tourneur live, et partenaires externes</span>
+          </li>
+          <li>
+            <span class="bi">Gestion des opérations commerciales</span>
+            <span class="bd"> - conception et suivi des produits physiques, digitaux, dérivés et merchandising</span>
+          </li>
+          <li>
+            <span class="bi">Organisation dʼévènements promotionnels</span>
+          </li>
+          <li>
+            <span class="bi">Mise en œuvre des actions médiatiques &amp; RP</span>
+            <span class="bd"> - ciblage médias, organisation et suivi des lancements dʼalbums et de tournées</span>
+          </li>
+          <li>
+            <span class="bi">Élaboration et suivi des budgets &amp; plans Marketing trimestriels et annuels</span>
+          </li>
+        </ul>
+
+        <!-- BELIEVE DIGITAL -->
+        <div class="co-block">
+          <div class="co-name">BELIEVE DIGITAL | Labels Naïve, Animal63, All Night Long</div>
+          <div class="co-date">
+            <span class="sq"></span><span>2022 - 2025</span>
+            <span class="sq"></span><span>Paris</span>
+          </div>
+          <div class="co-artists">Artistes | The Blaze, Izïa, Iliona, Gaël Faye, Tshegue, Acid Arab, Oxmo Puccino, ...</div>
+        </div>
+
+        <!-- BECAUSE MUSIC -->
+        <div class="co-block">
+          <div class="co-name">BECAUSE MUSIC | Label</div>
+          <div class="co-date">
+            <span class="sq"></span><span>2019 - 2022</span>
+            <span class="sq"></span><span>Paris</span>
+          </div>
+          <div class="co-artists">Artistes | Jorja Smith, Selah Sue, Calypso Rose, Magenta, ...</div>
+        </div>
+
+        <!-- UNIVERSAL 2019 -->
+        <div class="co-block">
+          <div class="co-name">UNIVERSAL MUSIC FRANCE | Label Barclay</div>
+          <div class="co-date">
+            <span class="sq"></span><span>2019</span>
+            <span class="sq"></span><span>Paris</span>
+          </div>
+          <div class="co-artists">Artistes | Izïa, Juliette Armanet, Feu! Chatterton, Lou Doillon, Jamie Cullum, ...</div>
+        </div>
+
+        <!-- Job 2 -->
+        <div class="job-title">Assistante Chefs de Projet Marketing</div>
+
+        <!-- UNIVERSAL 2017-2018 -->
+        <div class="co-block">
+          <div class="co-name">UNIVERSAL MUSIC FRANCE | Label Barclay</div>
+          <div class="co-date">
+            <span class="sq"></span><span>2017 - 2018</span>
+            <span class="sq"></span><span>Paris</span>
+          </div>
+          <div class="co-artists">
+            Artistes | Her, Vanessa Paradis, Kungs, Juliette Armanet, Feu! Chatterton,<br>
+            Benjamin Biolay, Marc Lavoine, Bernard Lavilliers, Roméo Elvis, ...
+          </div>
+        </div>
+
+        <!-- Job 3 -->
+        <div class="job-title">Chargée de Production, Financement, Administration</div>
+
+        <ul class="blist">
+          <li><span class="bi">Montage et Gestion des demandes de subventions finançant lʼévènement</span></li>
+          <li><span class="bi">Production &amp; Coordination des acteurs internes et externes</span></li>
+        </ul>
+
+        <!-- FESTIVAL ELECTRO ALTERNATIV -->
+        <div class="co-block">
+          <div class="co-name">FESTIVAL ELECTRO ALTERNATIV | 11e édition</div>
+          <div class="co-date">
+            <span class="sq"></span><span>2015</span>
+            <span class="sq"></span><span>Toulouse</span>
+          </div>
+          <div class="co-artists">10 jours | +18k spectateurs : concerts, conférences, ateliers, performances</div>
+        </div>
+
+      </div>
+    </div><!-- /col-left -->
+
+    <!-- ─── RIGHT COLUMN ─────────────────────────────────────── -->
+    <div class="col-right">
+
+      <!-- COMPÉTENCES -->
+      <div class="section">
+        <div class="sec-title">COMPÉTENCES</div>
+        <div class="sec-line"></div>
+
+        <div class="skill-cat">Équipe &amp; Relationnel</div>
+        <div class="skill-txt">
+          Très bon relationnel | Adaptabilité dans des situations complexes | Fédération d'équipes
+        </div>
+
+        <div class="skill-cat">Coordination de projets</div>
+        <div class="skill-txt">
+          Forte capacité de coordination de projets | Rigueur et capacité dʼinitiative | Esprit de synthèse
+        </div>
+
+        <div class="skill-cat">Vision créative</div>
+        <div class="skill-txt">
+          Création de stratégies globales et long terme | Développement dʼidentité visuelle et artistique
+        </div>
+      </div>
+
+      <!-- ÉDUCATION -->
+      <div class="section">
+        <div class="sec-title">ÉDUCATION</div>
+        <div class="sec-line"></div>
+
+        <div class="edu-block">
+          <div class="edu-deg">Master | Management</div>
+          <div class="edu-deg">Programme Grande Ecole</div>
+          <div class="edu-school">EM Lyon Business School</div>
+          <div class="edu-date">
+            <span class="sq"></span><span>2016 - 2018</span>
+            <span class="sq"></span><span>Lyon</span>
+          </div>
+        </div>
+
+        <div class="edu-block">
+          <div class="edu-deg">Master | Arts, Communication et Médias</div>
+          <div class="edu-school">Université Toulouse Jean Jaurès</div>
+          <div class="edu-date">
+            <span class="sq"></span><span>2014 - 2016</span>
+            <span class="sq"></span><span>Toulouse</span>
+          </div>
+        </div>
+
+        <div class="edu-block">
+          <div class="edu-deg">Licence | Médiation Culturelle,</div>
+          <div class="edu-deg">Communication et Sciences Politiques</div>
+          <div class="edu-prog">Programme Erasmus</div>
+          <div class="edu-school">Galatasaray University</div>
+          <div class="edu-date">
+            <span class="sq"></span><span>2014</span>
+            <span class="sq"></span><span>Istanbul, Turquie</span>
+          </div>
+        </div>
+
+        <div class="edu-block">
+          <div class="edu-deg">Licence | Médiation Culturelle et</div>
+          <div class="edu-deg">Communication</div>
+          <div class="edu-school">Institut Catholique de Toulouse</div>
+          <div class="edu-date">
+            <span class="sq"></span><span>2011 - 2014</span>
+            <span class="sq"></span><span>Toulouse</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGUES -->
+      <div class="section">
+        <div class="sec-title">LANGUES</div>
+        <div class="sec-line"></div>
+        <div class="lang-row">
+          <div>
+            <div class="lang-name">FRANÇAIS</div>
+            <div class="lang-level">Langue Maternelle</div>
+          </div>
+          <div>
+            <div class="lang-name">ANGLAIS</div>
+            <div class="lang-level">TOEIC 890 / 900</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTÉRÊTS -->
+      <div class="section">
+        <div class="sec-title">INTÉRÊTS</div>
+        <div class="sec-line"></div>
+
+        <div class="int-title">Photographie &amp; Films Outdoor</div>
+
+        <div class="int-gap">
+          <div class="int-title">Musique, Concerts</div>
+        </div>
+
+        <div class="int-gap">
+          <div class="int-title">Escalade &amp; Randonnée itinérante</div>
+          <div class="int-desc">
+            Dont une traversée des Pyrénées en autonomie<br>
+            41 Jours | 500km | 25 000m D+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /col-right -->
+  </div><!-- /body -->
+
+  <!-- ═══ ENGAGEMENTS ASSOCIATIFS (full width) ════════════════ -->
+  <div class="engagements">
+    <div class="sec-title">ENGAGEMENTS ASSOCIATIFS</div>
+    <div class="sec-line"></div>
+
+    <div class="eng-grid">
+
+      <!-- SOS MÉDITERRANÉE -->
+      <div class="eng-block">
+        <span class="eng-name">SOS MÉDITERRANÉE</span>
+        <span class="eng-sub"> | ONG de sauvetage en mer Méditerranée</span>
+        <div class="eng-act">Intervention en milieu scolaire</div>
+        <div class="eng-date">
+          <span class="sq"></span><span>2025 - En cours</span>
+          <span class="sq"></span><span>Marseille</span>
+        </div>
+        <div class="eng-url">https://sosmediterranee.fr/</div>
+      </div>
+
+      <!-- EN PASSANT PAR LES CALANQUES -->
+      <div class="eng-block">
+        <span class="eng-name">EN PASSANT PAR LES CALANQUES</span>
+        <span class="eng-sub"> | Association d'inclusion sociale</span>
+        <div class="eng-act">Projet dʼintervention psychosociale en nature</div>
+        <div class="eng-date">
+          <span class="sq"></span><span>2025</span>
+          <span class="sq"></span><span>Marseille</span>
+        </div>
+        <div class="eng-url">https://just.earth/En-passant-par-les-calanques</div>
+      </div>
+
+      <!-- RÈGLES ÉLÉMENTAIRES -->
+      <div class="eng-block">
+        <span class="eng-name">RÈGLES ÉLÉMENTAIRES</span>
+        <span class="eng-sub"> | Association pour l'égalité et la justice menstruelle</span>
+        <div class="eng-act">Organisation de collectes de produits menstruels</div>
+        <div class="eng-act">Mission de sensibilisation en université</div>
+        <div class="eng-date">
+          <span class="sq"></span><span>2018</span>
+          <span class="sq"></span><span>Lyon</span>
+        </div>
+        <div class="eng-url">https://www.regleselementaires.com/</div>
+      </div>
+
+      <!-- FESTIVAL LES SIESTES ÉLECTRONIQUES -->
+      <div class="eng-block">
+        <span class="eng-name">FESTIVAL LES SIESTES ÉLECTRONIQUES</span>
+        <span class="eng-sub"> | 4 éditions</span>
+        <div class="eng-act">Accueil &amp; Hospitalité des artistes</div>
+        <div class="eng-date">
+          <span class="sq"></span><span>2012 - 2015</span>
+          <span class="sq"></span><span>Toulouse</span>
+        </div>
+        <div class="eng-url">https://www.les-siestes.com/</div>
+      </div>
+
+    </div><!-- /eng-grid -->
+  </div>
+
+</div><!-- /cv -->
+</body>
+</html>
