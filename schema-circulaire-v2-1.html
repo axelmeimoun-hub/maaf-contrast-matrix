@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Schéma circulaire</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 600px;
+    height: 600px;
+    background: #0d0d0d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  .scene {
+    position: relative;
+    width: 520px;
+    height: 520px;
+  }
+
+  /* Subtle background glow */
+  .glow-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, #1a2a3a 0%, transparent 70%);
+  }
+
+  /* Orbit ring */
+  .orbit {
+    position: absolute;
+    inset: 60px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  /* SVG arrows overlay */
+  .arrows-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Nodes */
+  .node {
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+  }
+
+  .node-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s ease;
+  }
+
+  .node-inner::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    background: conic-gradient(from var(--angle, 0deg), transparent 60%, rgba(255,255,255,0.18) 75%, transparent 90%);
+    animation: spin 6s linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  @keyframes spin {
+    to { --angle: 360deg; }
+  }
+
+  /* Polyfill for conic-gradient animation */
+  @property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  .node-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .node-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.88);
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  /* Node positions — equilateral triangle on a circle r=185 centered at 260,260 */
+  /* Top: 260, 75 */
+  .node-1 { left: 260px; top: 75px; }
+  .node-1 .node-inner { --delay: 0s; }
+  .node-1 .node-inner::after {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2a4a6a, #0a1a2a);
+  }
+
+  /* Bottom-right: 260 + 185*sin(120°) = 260 + 160 = 420, 260 + 185*cos(120°)*-1 wait let me redo */
+  /* r=180, center=260,260 */
+  /* node1: top → angle=-90° → x=260, y=260-180=80 */
+  /* node2: angle=30° → x=260+180*cos(30°)=260+155.9=415.9, y=260+180*sin(30°)=260+90=350 */
+  /* node3: angle=150° → x=260-155.9=104.1, y=350 */
+
+  .node-2 { left: 416px; top: 350px; }
+  .node-2 .node-inner { --delay: -2s; }
+  .node-2 .node-inner::after {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2a4a6a, #0a1a2a);
+  }
+
+  .node-3 { left: 104px; top: 350px; }
+  .node-3 .node-inner { --delay: -4s; }
+  .node-3 .node-inner::after {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2a4a6a, #0a1a2a);
+  }
+
+  .node-inner > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Accent dot */
+  .node-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #7eb8e8;
+    margin-bottom: 6px;
+    box-shadow: 0 0 8px #7eb8e8;
+  }
+
+  /* Center label */
+  .center-label {
+    position: absolute;
+    left: 260px;
+    top: 260px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+  }
+
+  .center-label span {
+    display: block;
+    font-family: 'DM Serif Display', serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.18);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="glow-bg"></div>
+  <div class="orbit"></div>
+
+  <!-- SVG for arrows -->
+  <svg class="arrows-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Arrowheads -->
+      <marker id="ah1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0.5 L5,3 L0,5.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+      <marker id="ah2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0.5 L5,3 L0,5.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+      <marker id="ah3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0.5 L5,3 L0,5.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+
+      <!-- Gradient for arrows -->
+      <linearGradient id="ag1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="rgba(126,184,232,0.6)"/>
+        <stop offset="100%" stop-color="rgba(126,184,232,0.15)"/>
+      </linearGradient>
+      <linearGradient id="ag2" x1="100%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="rgba(126,184,232,0.6)"/>
+        <stop offset="100%" stop-color="rgba(126,184,232,0.15)"/>
+      </linearGradient>
+      <linearGradient id="ag3" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="rgba(126,184,232,0.6)"/>
+        <stop offset="100%" stop-color="rgba(126,184,232,0.15)"/>
+      </linearGradient>
+    </defs>
+
+    <!--
+      Nodes centers (in SVG coords = scene coords):
+      N1 (Maison):  260, 80
+      N2 (Pun Z):   416, 350
+      N3 (Travail): 104, 350
+      Radius of node = 55
+
+      Arc from N1 to N2: clockwise arc of the orbit circle (r=180, center=260,260)
+      Arc from N2 to N3: clockwise
+      Arc from N3 to N1: clockwise
+
+      Points on orbit circle at node angles:
+      N1 angle: -90° → orbit point 260,80 ✓
+      N2 angle: 30°  → orbit point 260+180*cos30=260+155.88=415.88, 260+180*sin30=260+90=350 ✓
+      N3 angle: 150° → orbit point 260+180*cos150=260-155.88=104.12, 350 ✓
+
+      Arrow starts offset from source node edge, ends offset before target node edge.
+      Offset ~58px from center.
+
+      N1→N2: start near N1 moving clockwise, end near N2
+      On circle r=180, arc from -90° to 30°. 
+      Start offset: angle -90+18° = -72° → 260+180*cos(-72°)=260+55.6=315.6, 260+180*sin(-72°)=260-171.2=88.8
+      End offset: angle 30-18° = 12° → 260+180*cos(12°)=260+176.1=436.1, 260+180*sin(12°)=260+37.4=297.4... 
+      
+      Let me just use a simpler approach: curved bezier paths between the node edges.
+    -->
+
+    <!-- N1→N2: Maison to Pun Z -->
+    <!-- From right-bottom of N1 circle to top-left of N2 circle, curving clockwise -->
+    <path d="M 303 107 Q 430 160 392 307"
+      fill="none"
+      stroke="url(#ag1)"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      marker-end="url(#ah1)"
+      opacity="0.8"
+    />
+
+    <!-- N2→N3: Pun Z to Travail -->
+    <!-- From bottom-left of N2 to bottom-right of N3, curving down -->
+    <path d="M 370 393 Q 260 430 150 393"
+      fill="none"
+      stroke="url(#ag2)"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      marker-end="url(#ah2)"
+      opacity="0.8"
+    />
+
+    <!-- N3→N1: Travail to Maison -->
+    <!-- From top-right of N3 to bottom-left of N1, curving left -->
+    <path d="M 128 307 Q 90 160 217 107"
+      fill="none"
+      stroke="url(#ag3)"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      marker-end="url(#ah3)"
+      opacity="0.8"
+    />
+
+    <!-- Animated dot traveling on each arc -->
+    <circle r="2.5" fill="#7eb8e8" opacity="0.9">
+      <animateMotion dur="4s" repeatCount="indefinite" begin="0s">
+        <mpath href="#path-arc1"/>
+      </animateMotion>
+    </circle>
+    <circle r="2.5" fill="#7eb8e8" opacity="0.9">
+      <animateMotion dur="4s" repeatCount="indefinite" begin="1.33s">
+        <mpath href="#path-arc2"/>
+      </animateMotion>
+    </circle>
+    <circle r="2.5" fill="#7eb8e8" opacity="0.9">
+      <animateMotion dur="4s" repeatCount="indefinite" begin="2.66s">
+        <mpath href="#path-arc3"/>
+      </animateMotion>
+    </circle>
+
+    <!-- Hidden paths for animateMotion -->
+    <path id="path-arc1" d="M 303 107 Q 430 160 392 307" fill="none" stroke="none"/>
+    <path id="path-arc2" d="M 370 393 Q 260 430 150 393" fill="none" stroke="none"/>
+    <path id="path-arc3" d="M 128 307 Q 90 160 217 107" fill="none" stroke="none"/>
+  </svg>
+
+  <!-- Node 1: Maison (top) -->
+  <div class="node node-1">
+    <div class="node-inner">
+      <div class="node-dot"></div>
+      <div class="node-number">01</div>
+      <div class="node-label">Maison</div>
+    </div>
+  </div>
+
+  <!-- Node 2: Pun Z (bottom right) -->
+  <div class="node node-2">
+    <div class="node-inner">
+      <div class="node-dot"></div>
+      <div class="node-number">02</div>
+      <div class="node-label">Pun Z</div>
+    </div>
+  </div>
+
+  <!-- Node 3: Travail (bottom left) -->
+  <div class="node node-3">
+    <div class="node-inner">
+      <div class="node-dot"></div>
+      <div class="node-number">03</div>
+      <div class="node-label">Travail</div>
+    </div>
+  </div>
+
+  <!-- Center -->
+  <div class="center-label">
+    <span>cycle</span>
+  </div>
+</div>
+</body>
+</html>
