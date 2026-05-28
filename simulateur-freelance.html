@@ -42,10 +42,10 @@
   .input-wrap .unit { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 400; color: var(--muted); pointer-events: none; }
   .field .hint { font-size: 11px; font-weight: 300; color: var(--hint); }
 
-  /* CA — ligne 1 : 3 colonnes */
+  /* CA ligne 1 : 3 colonnes */
   .ca-row1 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
-  /* CA — ligne 2 : 2 colonnes, séparées visuellement */
-  .ca-row2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-top: none; }
+  /* CA ligne 2 : CA mensuel net (large) + CA annuel (petit) */
+  .ca-row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-top: none; }
 
   .ca-card { background: var(--surface); padding: 16px 18px; }
   .ca-card.dimmed { background: var(--surface2); }
@@ -53,7 +53,29 @@
   .ca-card .val { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--text); }
   .ca-card .sub { font-size: 11px; font-weight: 300; color: var(--hint); margin-top: 3px; }
 
-  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  /* CA mensuel net — mis en avant */
+  .ca-card.featured { background: var(--text); }
+  .ca-card.featured .label { color: rgba(255,255,255,0.45); }
+  .ca-card.featured .val { font-size: 30px; color: #ffffff; }
+  .ca-card.featured .sub { color: rgba(255,255,255,0.35); }
+
+  /* CA annuel — mis en retrait */
+  .ca-card.faded { background: var(--surface2); }
+  .ca-card.faded .label { color: var(--hint); }
+  .ca-card.faded .val { font-size: 18px; color: var(--hint); }
+  .ca-card.faded .sub { color: rgba(0,0,0,0.2); }
+
+  /* Dropdown */
+  .dropdown { border: 1px solid var(--border); overflow: hidden; }
+  .dropdown-trigger { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--surface); cursor: pointer; user-select: none; border: none; width: 100%; text-align: left; }
+  .dropdown-trigger:hover { background: var(--surface2); }
+  .dropdown-trigger .dt-label { font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hint); }
+  .dropdown-trigger .dt-arrow { font-size: 13px; color: var(--hint); transition: transform 0.25s; display: inline-block; }
+  .dropdown-trigger.open .dt-arrow { transform: rotate(180deg); }
+  .dropdown-body { display: none; border-top: 1px solid var(--border); }
+  .dropdown-body.open { display: block; }
+
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
   @media (max-width: 520px) { .results-grid { grid-template-columns: 1fr; } }
   .result-card { padding: 22px 20px; }
   .result-card.acre1 { background: var(--green-dim); }
@@ -78,7 +100,7 @@
   .td-green { color: var(--green) !important; font-weight: 500 !important; }
   .td-amber { color: var(--amber) !important; font-weight: 500 !important; }
 
-  .footer-note { font-size: 12px; font-weight: 300; color: var(--hint); line-height: 1.9; margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--border); }
+  .footer-note { font-size: 12px; font-weight: 300; color: var(--hint); line-height: 1.9; padding: 14px 18px; border-top: 0.5px solid var(--border); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
@@ -123,8 +145,6 @@
 
   <div class="section">
     <div class="section-label">Chiffre d'affaires</div>
-
-    <!-- Ligne 1 : sem / mois brut / remise -->
     <div class="ca-row1">
       <div class="ca-card">
         <div class="label">Par semaine</div>
@@ -142,15 +162,13 @@
         <div class="sub" id="r-remise-sub">Aucune remise</div>
       </div>
     </div>
-
-    <!-- Ligne 2 : CA mensuel net / CA annuel -->
     <div class="ca-row2">
-      <div class="ca-card dimmed">
+      <div class="ca-card featured">
         <div class="label">CA mensuel net</div>
         <div class="val" id="r-net-ca">—</div>
         <div class="sub">Après remise</div>
       </div>
-      <div class="ca-card dimmed">
+      <div class="ca-card faded">
         <div class="label">CA annuel</div>
         <div class="val" id="r-annuel">—</div>
         <div class="sub">× 12 mois</div>
@@ -158,49 +176,62 @@
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-label">Net mensuel après impôt</div>
-    <div class="results-grid">
-      <div class="result-card acre1">
-        <div class="rc-label">ACRE — Année 1</div>
-        <div class="rc-val" id="r-acre1">—</div>
-        <div class="rc-sub">Cotisations −50%</div>
-      </div>
-      <div class="result-card acre2">
-        <div class="rc-label">ACRE — Année 2</div>
-        <div class="rc-val" id="r-acre2">—</div>
-        <div class="rc-sub">Cotisations −25%</div>
-      </div>
-      <div class="result-card normal">
-        <div class="rc-label">Sans ACRE</div>
-        <div class="rc-val" id="r-normal">—</div>
-        <div class="rc-sub">Taux plein 24,8%</div>
-      </div>
-    </div>
-  </div>
+  <!-- Dropdown "Détail net" -->
+  <div class="dropdown">
+    <button class="dropdown-trigger" id="dropdown-btn" onclick="toggleDropdown()">
+      <span class="dt-label">Détail net</span>
+      <span class="dt-arrow">&#8964;</span>
+    </button>
+    <div class="dropdown-body" id="dropdown-body">
 
-  <div class="section">
-    <div class="section-label">Détail du calcul</div>
-    <table class="detail-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>ACRE an. 1</th>
-          <th>ACRE an. 2</th>
-          <th>Sans ACRE</th>
-        </tr>
-      </thead>
-      <tbody id="detail-tbody"></tbody>
-    </table>
-    <div class="footer-note">
-      Barème IR 2025 · Abattement BNC 34% · Célibataire sans enfant<br>
-      ACRE an. 1 = cotisations ×50% · ACRE an. 2 = cotisations ×75% · Formation pro 0,2% non réduite<br>
-      Estimations indicatives — consulter un expert-comptable pour un calcul personnalisé.
+      <div class="results-grid">
+        <div class="result-card acre1">
+          <div class="rc-label">ACRE — Année 1</div>
+          <div class="rc-val" id="r-acre1">—</div>
+          <div class="rc-sub">Cotisations −50%</div>
+        </div>
+        <div class="result-card acre2">
+          <div class="rc-label">ACRE — Année 2</div>
+          <div class="rc-val" id="r-acre2">—</div>
+          <div class="rc-sub">Cotisations −25%</div>
+        </div>
+        <div class="result-card normal">
+          <div class="rc-label">Sans ACRE</div>
+          <div class="rc-val" id="r-normal">—</div>
+          <div class="rc-sub">Taux plein 24,8%</div>
+        </div>
+      </div>
+
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ACRE an. 1</th>
+            <th>ACRE an. 2</th>
+            <th>Sans ACRE</th>
+          </tr>
+        </thead>
+        <tbody id="detail-tbody"></tbody>
+      </table>
+
+      <div class="footer-note">
+        Barème IR 2025 · Abattement BNC 34% · Célibataire sans enfant<br>
+        ACRE an. 1 = cotisations ×50% · ACRE an. 2 = cotisations ×75% · Formation pro 0,2% non réduite<br>
+        Estimations indicatives — consulter un expert-comptable pour un calcul personnalisé.
+      </div>
+
     </div>
   </div>
 
 </div>
 <script>
+function toggleDropdown() {
+  const btn = document.getElementById('dropdown-btn');
+  const body = document.getElementById('dropdown-body');
+  btn.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
 const TRANCHES = [
   {min:0,max:11497,taux:0},
   {min:11497,max:29315,taux:0.11},
